@@ -1,0 +1,6 @@
+[submodule "front"]
+	path = front
+	url = https://github.com/KazumasaAbe/Tono_v1_front
+[submodule "api"]
+	path = api
+	url = https://github.com/KazumasaAbe/Tono_v1_api
