@@ -1,0 +1,46 @@
+# Composeファイルのバージョンを指定
+version: "3.8"
+# この下で各コンテナの設定を行う
+services:
+  db:
+    image: postgres:12.3-alpine
+    # 環境変数をキー: 値で指定
+    environment:
+      TZ: UTC
+      PGTZ: UTC
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+    # データベースの値を永続化
+    volumes:
+      - ./api/tmp/db:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: ./api
+      # Dockerfileに渡す値を指定
+      args:
+        WORKDIR: $WORKDIR
+    environment:
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+    volumes:
+      - ./api:/$WORKDIR
+      # サービスの依存関係を定義
+    depends_on:
+      - db
+      # コンテナの3000ポートを、ブラウザ上で8080で参照する
+    ports:
+      - "$API_PORT:$CONTAINER_PORT"
+
+  front:
+    build:
+      context: ./front
+      args:
+        WORKDIR: $WORKDIR
+        CONTAINER_PORT: $CONTAINER_PORT
+    # Nuxt.jsの場合は、開発環境と本番環境で起動コマンドが変わる
+    command: yarn run dev
+    volumes:
+      - ./front:/$WORKDIR
+    ports:
+      - "$FRONT_PORT:$CONTAINER_PORT"
+    depends_on:
+      - api
